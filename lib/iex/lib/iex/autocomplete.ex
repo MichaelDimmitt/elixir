@@ -163,7 +163,6 @@ defmodule IEx.Autocomplete do
         mod
         |> fun.()
         |> match_module_funs(hint, false)
-        |> format_expansion(hint)
 
       _ ->
         no()
@@ -261,7 +260,6 @@ defmodule IEx.Autocomplete do
     mod
     |> get_module_funs()
     |> match_module_funs(hint, exact?)
-    |> format_expansion(hint)
   end
 
   ## Expand local or var
@@ -285,6 +283,7 @@ defmodule IEx.Autocomplete do
   defp match_local(hint, exact?, shell) do
     imports = imports_from_env(shell) |> Enum.flat_map(&elem(&1, 1))
     module_funs = get_module_funs(Kernel.SpecialForms)
+    IO.inspect('no')
     match_module_funs(imports ++ module_funs, hint, exact?)
   end
 
@@ -456,12 +455,15 @@ defmodule IEx.Autocomplete do
         format_expansion(all, hint)
 
       parts ->
+        IO.inspect({'parts', parts})
         hint = List.last(parts)
         list = Enum.take(parts, length(parts) - 1)
 
         value_from_alias(list, shell)
         |> match_elixir_modules(hint)
         |> format_expansion(hint)
+        |> dbg
+
     end
   end
 
@@ -529,13 +531,15 @@ defmodule IEx.Autocomplete do
     prefix = :binary.longest_common_prefix(binary)
 
     if prefix in [0, length] do
+      # IO.inspect(Enum.flat_map(entries, &to_entries/1))
       yes("", Enum.flat_map(entries, &to_entries/1))
     else
-      yes(binary_part(first.name, prefix, length - prefix), [])
+      # yes(binary_part(first.name, prefix, length - prefix), [])
     end
   end
 
   defp yes(hint, entries) do
+    IO.inspect({:yes, String.to_charlist(hint), Enum.map(entries, &String.to_charlist/1)})
     {:yes, String.to_charlist(hint), Enum.map(entries, &String.to_charlist/1)}
   end
 
@@ -590,7 +594,7 @@ defmodule IEx.Autocomplete do
   end
 
   defp match_module_funs(funs, hint, exact?) do
-    for {fun, arity} <- funs,
+    foo = for {fun, arity} <- funs,
         name = Atom.to_string(fun),
         if(exact?, do: name == hint, else: String.starts_with?(name, hint)) do
       %{
@@ -599,7 +603,9 @@ defmodule IEx.Autocomplete do
         arity: arity
       }
     end
-    |> Enum.sort_by(&{&1.name, &1.arity})
+    IO.inspect(foo)
+    zoo = Enum.sort_by(foo, &{&1.arity})
+    IO.inspect(zoo)
   end
 
   defp match_map_fields(map, hint) do
