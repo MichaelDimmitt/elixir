@@ -695,7 +695,7 @@ defmodule IEx.Autocomplete do
   ## Ad-hoc conversions
 
   defp to_entries(%{kind: :function, name: name, arity: arity}) do
-    ["#{name}/#{arity}"]
+    ["#{arity}/#{name}"]
   end
 
   defp to_entries(%{kind: :sigil, name: name}) do
